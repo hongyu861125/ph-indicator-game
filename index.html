@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>pH值和指示劑｜互動實驗室</title>
+<style>
+:root{--ink:#253247;--teal:#78bdb3;--paper:#fbfcff;--gold:#d9b65d}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;color:var(--ink);background:linear-gradient(135deg,#f4f8ff,#fffaf0);min-height:100vh}
+header{text-align:center;padding:22px 14px 10px}
+h1{margin:0;font-size:clamp(26px,4vw,40px);letter-spacing:2px}
+header p{margin:8px 0 0;color:#617086}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);gap:18px;max-width:1500px;margin:18px auto;padding:0 18px 26px}
+.panel{background:#fff;border:1px solid #e3eaf2;border-radius:20px;box-shadow:0 8px 24px #2532470d;padding:16px}
+.panel h2{font-size:19px;margin:0 0 12px}
+.item{width:100%;display:flex;align-items:center;gap:12px;text-align:left;border:2px solid #e4e9ef;border-radius:14px;background:#fff;padding:10px;margin:8px 0;cursor:pointer;transition:.18s;color:var(--ink);font:inherit}
+.item:hover{transform:translateY(-2px);border-color:#93cfc5}
+.item.selected{border-color:#e0b84f;background:#fff9e8;box-shadow:0 0 0 3px #f5e5b2}
+.bottle{width:42px;height:42px;display:grid;place-items:center;border-radius:12px;background:#fff1c7;font-size:25px;flex-shrink:0}
+.item strong{display:block;font-size:15px}
+.item small{display:block;color:#788496;font-size:12px;margin-top:3px}
+.hint{background:#f1f7ff;border-radius:12px;padding:11px;font-size:13px;line-height:1.6;color:#53657b;margin-top:14px}
+.main{min-width:0}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.status{font-weight:700;background:#eaf7f3;padding:9px 12px;border-radius:10px;font-size:14px}
+button.action{border:0;border-radius:10px;padding:10px 14px;background:#344e6b;color:white;font:inherit;cursor:pointer}
+button.action.secondary{background:#e9eef5;color:#33445a}
+.tubes{display:grid;grid-template-columns:repeat(7,minmax(58px,1fr));gap:14px 8px;align-items:end}
+.tube-wrap{text-align:center;cursor:pointer;padding:6px 2px;border-radius:14px;border:2px solid transparent;transition:.18s;min-width:0}
+.tube-wrap:hover{background:#f4f8ff;border-color:#d8e6f5}
+.tube-wrap:focus{outline:3px solid #e7c75e}
+.ph-label{font-size:16px;font-weight:700;margin-bottom:8px}
+.testtube{position:relative;margin:auto;width:42px;height:168px;border:3px solid #83c2b8;border-top:0;border-radius:0 0 21px 21px;overflow:hidden;background:#fff;box-shadow:inset 3px 0 0 #e9fbf7}
+.liquid{position:absolute;bottom:0;left:0;right:0;height:72%;background:#e9e6ff;transition:background .5s,height .3s;border-radius:0 0 17px 17px}
+.tube-mouth{position:absolute;top:0;left:calc(50% - 23px);width:46px;height:7px;border:3px solid #83c2b8;border-bottom:0;border-radius:5px 5px 0 0}
+.drop{position:absolute;top:30px;left:50%;width:10px;height:14px;border-radius:70% 30% 60% 40%;background:#4f9dd9;transform:translateX(-50%) rotate(35deg);opacity:0}
+.tube-wrap.pour .drop{animation:drop .6s ease-in}
+@keyframes drop{0%{top:25px;opacity:0}35%{opacity:1}100%{top:105px;opacity:0}}
+.tube-wrap:nth-child(even) .ph-label{margin-top:0}
+.ph-note{font-size:11px;color:#7b8796;margin-top:6px;min-height:14px}
+.result{margin-top:16px;display:grid;grid-template-columns:1.2fr 1fr;gap:12px}
+.result-card{border-radius:15px;padding:14px;background:#f7f9fc;border:1px solid #e7edf4;min-height:94px}
+.result-card h3{font-size:15px;margin:0 0 7px}
+.result-card p{font-size:14px;line-height:1.6;margin:0;color:#53657b}
+.legend{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.legend span{font-size:12px;padding:6px 9px;border-radius:20px;background:#f0f3f8}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.items-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 8px}.tubes{grid-template-columns:repeat(4,minmax(55px,1fr))}.testtube{height:145px}.result{grid-template-columns:1fr}}
+@media(max-width:430px){.layout{padding:0 10px}.panel{padding:12px}.items-grid{grid-template-columns:1fr 1fr}.item{padding:8px;gap:7px}.bottle{width:32px;height:32px;font-size:20px}.item strong{font-size:13px}.tubes{grid-template-columns:repeat(3,minmax(55px,1fr))}}
+
+.modal-backdrop{position:fixed;inset:0;background:rgba(26,39,58,.58);display:none;align-items:center;justify-content:center;padding:18px;z-index:99}
+.modal-backdrop.open{display:flex}
+.modal{width:min(760px,100%);background:#fff;border-radius:20px;padding:20px;box-shadow:0 20px 70px #10182855;max-height:90vh;overflow:auto}
+.modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.modal-head h2{margin:0;font-size:22px}
+.close-modal{border:0;border-radius:10px;background:#edf1f6;padding:8px 12px;font:inherit;cursor:pointer}
+.chart-title{text-align:center;font-size:18px;font-weight:800;margin:10px 0}
+.chart-scale{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:0;margin:0 2px}
+.chart-swatch{height:70px;border:1px solid #fff}
+.chart-numbers{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));text-align:center;font-size:13px;margin-top:6px}
+.chart-explain{margin-top:14px;padding:12px;background:#f5f8fc;border-radius:12px;line-height:1.7;color:#526176}
+.modal img{max-width:100%;height:auto;display:block}
+@media(max-width:500px){.modal{padding:12px}.chart-swatch{height:48px}.chart-numbers{font-size:10px}.chart-title{font-size:16px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🧪 pH 值和指示劑</h1>
+  <p>選擇左側的指示劑，再點選試管，觀察不同 pH 的顏色變化！</p>
+</header>
+<div class="layout">
+  <aside class="panel">
+    <h2>🧴 指示劑工具箱</h2>
+    <div class="items-grid">
+      <button class="item selected" data-tool="phenol"><span class="bottle">🧪</span><span><strong>酚酞指示劑</strong><small>觀察酸、鹼的變色</small></span></button>
+      <button class="item" data-tool="phenolCard"><span class="bottle">🟪</span><span><strong>酚酞圖示卡</strong><small>查看酚酞變色規則</small></span></button>
+      <button class="item" data-tool="universal"><span class="bottle">🧪</span><span><strong>廣用指示劑</strong><small>觀察 pH 顏色光譜</small></span></button>
+      <button class="item" data-tool="universalCard"><span class="bottle">🌈</span><span><strong>廣用圖示卡</strong><small>查看 pH 顏色對照</small></span></button>
+      <button class="item" data-tool="litmus"><span class="bottle">🧪</span><span><strong>石蕊指示劑</strong><small>觀察紅、紫、藍變化</small></span></button>
+      <button class="item" data-tool="litmusCard"><span class="bottle">🟪</span><span><strong>石蕊圖示卡</strong><small>查看石蕊變色規則</small></span></button>
+    </div>
+    <div class="hint" id="toolHint">目前選取：酚酞指示劑。請點選任一試管，模擬滴入指示劑。</div>
+  </aside>
+  <main class="panel main">
+    <div class="toolbar">
+      <div class="status" id="status">目前工具：酚酞指示劑</div>
+      <div>
+        <button class="action secondary" id="reset">重新開始</button>
+        <button class="action" id="showAll">全部試管滴入</button>
+      </div>
+    </div>
+    <div class="tubes" id="tubes" aria-label="pH 1 到 14 的試管"></div>
+    <div class="result">
+      <section class="result-card"><h3>🔍 觀察紀錄</h3><p id="observation">先選取指示劑，再點一支試管開始觀察。你也可以比較同一指示劑在不同 pH 的顏色。</p></section>
+      <section class="result-card"><h3>💡 想一想</h3><p id="question">為什麼同一種指示劑，滴入不同 pH 的溶液後，顏色可能不同？</p></section>
+    </div>
+    <div class="legend" aria-label="酸鹼分類">
+      <span>🔴 pH 1–6：酸性</span><span>🟢 pH 7：中性</span><span>🔵 pH 8–14：鹼性</span>
+    </div>
+  </main>
+
+</div>
+<div class="modal-backdrop" id="cardModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal">
+    <div class="modal-head"><h2 id="modalTitle">指示劑圖示卡</h2><button class="close-modal" id="closeModal">關閉 ✕</button></div>
+    <div id="modalContent"></div>
+  </div>
+</div>
+<script>
+const tools = {
+ phenol:{name:'酚酞指示劑',hint:'酚酞在酸性與中性溶液中通常無色，在鹼性溶液中會轉為粉紅至桃紅色。',color:p=>p<=8?'#f3f0ff':p===9?'#f9d2e4':p<=11?'#f58fbd':'#e94b9b'},
+ phenolCard:{name:'酚酞圖示卡',card:true,hint:'酚酞顏色對照：酸性／中性＝無色；鹼性＝粉紅色。選擇試管可查看對照結果。',color:p=>p<=8?'#f3f0ff':p===9?'#f9d2e4':p<=11?'#f58fbd':'#e94b9b'},
+ universal:{name:'廣用指示劑',hint:'廣用指示劑會依 pH 呈現不同顏色：強酸偏紅、弱酸偏橙黃、中性偏綠、鹼性偏藍紫。',color:p=>({1:'#e84135',2:'#f05a36',3:'#f47738',4:'#f5a13d',5:'#f4d34f',6:'#d8e65a',7:'#55bd72',8:'#2fb6a4',9:'#3a9ed6',10:'#3e70cb',11:'#5557bd',12:'#744bb7',13:'#8d3ca7',14:'#692d8b'})[p]},
+ universalCard:{name:'廣用圖示卡',card:true,hint:'廣用指示劑色帶：pH 越低通常越偏紅／橙，接近 7 為綠色，pH 越高越偏藍／紫。',color:p=>({1:'#e84135',2:'#f05a36',3:'#f47738',4:'#f5a13d',5:'#f4d34f',6:'#d8e65a',7:'#55bd72',8:'#2fb6a4',9:'#3a9ed6',10:'#3e70cb',11:'#5557bd',12:'#744bb7',13:'#8d3ca7',14:'#692d8b'})[p]},
+ litmus:{name:'石蕊指示劑',hint:'石蕊在酸性溶液中偏紅，中性附近呈紫色，在鹼性溶液中偏藍。',color:p=>p<7?'#e45c68':p===7?'#9b78c9':'#438bd3'},
+ litmusCard:{name:'石蕊圖示卡',card:true,hint:'石蕊顏色對照：酸性＝紅色；中性附近＝紫色；鹼性＝藍色。',color:p=>p<7?'#e45c68':p===7?'#9b78c9':'#438bd3'}
+};
+let selected='phenol';
+const done=new Map();
+const tubeBox=document.getElementById('tubes');
+for(let p=1;p<=14;p++){
+ const wrap=document.createElement('div');wrap.className='tube-wrap';wrap.tabIndex=0;wrap.setAttribute('role','button');wrap.setAttribute('aria-label',`pH ${p} 試管`);
+ wrap.innerHTML=`<div class="ph-label">pH ${p}</div><div class="testtube"><div class="liquid" id="liquid-${p}" style="background:#e9e6ff"></div><div class="drop"></div></div><div class="ph-note" id="note-${p}">尚未測試</div>`;
+ wrap.addEventListener('click',()=>apply(p,wrap));wrap.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();apply(p,wrap)}});
+ tubeBox.appendChild(wrap);
+}
+function apply(p,wrap){
+ const tool=tools[selected];const color=tool.color(p);done.set(p,selected);
+ const liquid=document.getElementById(`liquid-${p}`);liquid.style.background=color;
+ document.getElementById(`note-${p}`).textContent=tool.card?'對照卡': '已滴入';
+ wrap.classList.remove('pour');void wrap.offsetWidth;wrap.classList.add('pour');
+ const kind=p<7?'酸性':p===7?'中性':'鹼性';
+ let desc='';
+ if(selected.startsWith('phenol')) desc=p<=8?'呈無色（以淡紫色液面作為無色示意）':'呈粉紅至桃紅色';
+ else if(selected.startsWith('universal')) desc=`呈現${({1:'紅色',2:'紅橙色',3:'橙紅色',4:'橙色',5:'黃色',6:'黃綠色',7:'綠色',8:'藍綠色',9:'藍色',10:'藍色',11:'藍紫色',12:'紫色',13:'紫紅色',14:'深紫色'})[p]}（示意色）`;
+ else desc=p<7?'呈紅色':p===7?'呈紫色':'呈藍色';
+ document.getElementById('observation').textContent=`pH ${p} 的溶液屬於${kind}。使用「${tool.name}」後，觀察到${desc}。`;
+ document.getElementById('question').textContent=`比較 pH ${p} 和其他試管：哪些顏色相同？哪些不同？這些差異能幫助我們判斷溶液的什麼性質？`;
+}
+
+const cardModal=document.getElementById('cardModal');
+const phNums=Array.from({length:14},(_,i)=>i+1);
+const chartColors={
+ phenol:['#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#ffffff','#f4d9e9','#f4a9d8','#ef72cb','#ed35dc','#ed35dc','#ed35dc'],
+ universal:['#b82c17','#e53d13','#df682a','#df914b','#d9ad70','#d9ca83','#8eaa9d','#639c97','#3d91b8','#397fbd','#1760a6','#244d8e','#303b80','#6c2d69'],
+ litmus:['#ff8088','#ff8088','#ff8088','#ff8088','#ff8088','#ff8088','#a10fd0','#a10fd0','#8581ff','#8581ff','#8581ff','#8581ff','#8581ff','#8581ff']
+};
+const cardInfo={
+ phenol:{title:'酚酞指示劑｜顏色對照卡',note:'酸性與中性通常呈無色；鹼性逐漸呈粉紅至桃紅色。此圖為教學示意。'},
+ universal:{title:'廣用指示劑｜pH 顏色對照卡',note:'廣用指示劑會隨 pH 改變顏色：酸性偏紅、橙、黃；接近中性偏綠；鹼性偏藍、紫。實際顏色會因配方而有差異。'},
+ litmus:{title:'石蕊指示劑｜顏色對照卡',note:'酸性呈紅色；中性附近呈紫色；鹼性呈藍色。此圖為簡化的教學示意。'}
+};
+function openIndicatorCard(type){
+ const info=cardInfo[type], colors=chartColors[type];
+ document.getElementById('modalTitle').textContent=info.title;
+ const swatches=colors.map((c,i)=>`<div class="chart-swatch" title="pH ${i+1}" style="background:${c}"></div>`).join('');
+ const nums=phNums.map(n=>`<div>${n}</div>`).join('');
+ document.getElementById('modalContent').innerHTML=`<div class="chart-title">${info.title}</div><div class="chart-scale">${swatches}</div><div class="chart-numbers">${nums}</div><div class="chart-explain">${info.note}<br><strong>使用方式：</strong>對照試管的 pH 數字與色帶，觀察顏色的變化。</div>`;
+ cardModal.classList.add('open');
+}
+document.getElementById('closeModal').addEventListener('click',()=>cardModal.classList.remove('open'));
+cardModal.addEventListener('click',e=>{if(e.target===cardModal)cardModal.classList.remove('open')});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')cardModal.classList.remove('open')});
+
+document.querySelectorAll('.item').forEach(btn=>btn.addEventListener('click',()=>{
+ document.querySelectorAll('.item').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');selected=btn.dataset.tool;
+ if(selected==='phenolCard') openIndicatorCard('phenol');
+ if(selected==='universalCard') openIndicatorCard('universal');
+ if(selected==='litmusCard') openIndicatorCard('litmus');
+ const tool=tools[selected];document.getElementById('status').textContent=`目前工具：${tool.name}`;
+ document.getElementById('toolHint').textContent=tool.hint;
+ document.getElementById('observation').textContent=tool.card?'圖示卡已選取。點選試管，查看這種指示劑的顏色對照。':'請點選任一試管，模擬滴入指示劑。';
+ document.getElementById('question').textContent=tool.card?'根據圖示卡，你能預測酸性、中性、鹼性溶液各會呈現什麼顏色嗎？':'同一種指示劑遇到不同酸鹼程度的溶液，顏色會怎麼變？';
+}));
+document.getElementById('reset').addEventListener('click',()=>{
+ done.clear();document.querySelectorAll('.liquid').forEach(el=>el.style.background='#e9e6ff');document.querySelectorAll('.ph-note').forEach(el=>el.textContent='尚未測試');
+ document.getElementById('observation').textContent='已清除所有觀察紀錄。選取指示劑，再點試管重新實驗。';
+ document.getElementById('question').textContent='先預測，再操作：你認為哪幾支試管會呈現相近的顏色？';
+});
+document.getElementById('showAll').addEventListener('click',()=>{
+ document.querySelectorAll('.tube-wrap').forEach((wrap,i)=>apply(i+1,wrap));
+ document.getElementById('observation').textContent=`已將「${tools[selected].name}」套用到 pH 1–14。請沿著試管列觀察顏色變化。`;
+});
+</script>
+</body>
+</html>
